@@ -4,7 +4,6 @@ import processPatterns from './patterns.ts';
 import type { Crawler, InternalOptions, InternalProps, RelativeMapper } from './types.ts';
 import { BACKSLASHES, buildFormat, buildRelative, getPartialMatcher, log } from './utils.ts';
 
-// #region buildCrawler
 export function buildCrawler(options: InternalOptions, patterns: readonly string[]): [Crawler, false | RelativeMapper] {
   const cwd = options.cwd as string;
   const props: InternalProps = { root: cwd, depthOffset: 0 };

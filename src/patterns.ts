@@ -4,7 +4,7 @@ import { escapePath, isDynamicPattern, splitPattern } from './utils.ts';
 
 const PARENT_DIRECTORY = /^(\/?\.\.)+/;
 const ESCAPING_BACKSLASHES = /\\(?=[()[\]{}!*+?@|])/g;
-//#region normalizePattern
+
 function normalizePattern(pattern: string, opts: InternalOptions, props: InternalProps, isIgnore: boolean) {
   const cwd = opts.cwd as string;
   let result: string = pattern;
@@ -24,15 +24,15 @@ function normalizePattern(pattern: string, opts: InternalOptions, props: Interna
 
   const parentDir = PARENT_DIRECTORY.exec(result)?.[0];
   const parts = splitPattern(result);
-  let i = 0;
-
   if (parentDir) {
     const n = (parentDir.length + 1) / 3;
 
     // normalize a pattern like `../foo/bar` to `bar` when cwd ends with `/foo`
+    let i = 0;
     const cwdParts = escapedCwd.split('/');
     while (i < n && parts[i + n] === cwdParts[cwdParts.length + i - n]) {
-      result = `${result.slice(0, (n - i - 1) * 3)}${result.slice((n - i) * 3 + parts[i++ + n].length + 1) || '.'}`;
+      result = result.slice(0, (n - i - 1) * 3) + result.slice((n - i) * 3 + parts[i + n].length + 1) || '.';
+      i++;
     }
 
     // move root `n` directories up
@@ -50,7 +50,7 @@ function normalizePattern(pattern: string, opts: InternalOptions, props: Interna
     const newCommonPath: string[] = [];
     const length = Math.min(props.commonPath.length, parts.length);
 
-    for (i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
       const part = parts[i];
 
       if (part === '**' && !parts[i + 1]) {
@@ -61,6 +61,8 @@ function normalizePattern(pattern: string, opts: InternalOptions, props: Interna
       if (i === parts.length - 1 || part !== props.commonPath[i] || isDynamicPattern(part)) {
         break;
       }
+
+      newCommonPath.push(part);
     }
 
     props.depthOffset = newCommonPath.length;
@@ -71,9 +73,7 @@ function normalizePattern(pattern: string, opts: InternalOptions, props: Interna
 
   return result;
 }
-//#endregion normalizePattern
 
-//#region processPatterns
 export default function processPatterns(
   options: InternalOptions,
   patterns: readonly string[],
@@ -83,22 +83,25 @@ export default function processPatterns(
   const ignorePatterns: string[] = [];
 
   for (const pattern of options.ignore) {
+    if (!pattern) {
+      continue;
+    }
     // don't handle negated patterns here for consistency with fast-glob
-    if (pattern && (pattern[0] !== '!' || pattern[1] === '(')) {
+    if (pattern[0] !== '!' || pattern[1] === '(') {
       ignorePatterns.push(normalizePattern(pattern, options, props, true));
     }
   }
 
   for (const pattern of patterns) {
-    if (pattern) {
-      if (pattern[0] !== '!' || pattern[1] === '(') {
-        matchPatterns.push(normalizePattern(pattern, options, props, false));
-      } else if (pattern[1] !== '!' || pattern[2] === '(') {
-        ignorePatterns.push(normalizePattern(pattern.slice(1), options, props, true));
-      }
+    if (!pattern) {
+      continue;
+    }
+    if (pattern[0] !== '!' || pattern[1] === '(') {
+      matchPatterns.push(normalizePattern(pattern, options, props, false));
+    } else if (pattern[1] !== '!' || pattern[2] === '(') {
+      ignorePatterns.push(normalizePattern(pattern.slice(1), options, props, true));
     }
   }
 
   return { match: matchPatterns, ignore: ignorePatterns };
 }
-//#endregion processPatterns
