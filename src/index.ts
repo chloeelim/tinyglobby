@@ -1,8 +1,8 @@
-import nativeFs from 'node:fs';
+import { readdir, readdirSync, realpath, realpathSync, stat, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildCrawler } from './crawler.ts';
-import type { Crawler, FileSystemAdapter, GlobInput, GlobOptions, InternalOptions, RelativeMapper } from './types.ts';
+import type { Crawler, GlobInput, GlobOptions, InternalOptions, RelativeMapper } from './types.ts';
 import { BACKSLASHES, ensureStringArray, isReadonlyArray, log } from './utils.ts';
 
 function formatPaths(paths: string[], mapper?: false | RelativeMapper) {
@@ -12,17 +12,6 @@ function formatPaths(paths: string[], mapper?: false | RelativeMapper) {
     }
   }
   return paths;
-}
-
-const fsKeys = ['readdir', 'readdirSync', 'realpath', 'realpathSync', 'stat', 'statSync'];
-
-function normalizeFs(fs?: Record<string, unknown>): FileSystemAdapter | undefined {
-  if (fs && fs !== nativeFs) {
-    for (const key of fsKeys) {
-      fs[key] = (fs[key] ? fs : (nativeFs as Record<string, unknown>))[key];
-    }
-  }
-  return fs;
 }
 
 // Object containing all default options to ensure there is no hidden state difference
@@ -42,7 +31,15 @@ function getOptions(options?: GlobOptions): InternalOptions {
   opts.cwd = (opts.cwd instanceof URL ? fileURLToPath(opts.cwd) : resolve(opts.cwd)).replace(BACKSLASHES, '/');
   // Default value of [] will be inserted here if ignore is undefined
   opts.ignore = ensureStringArray(opts.ignore);
-  opts.fs = normalizeFs(opts.fs);
+
+  opts.fs &&= {
+    readdir: opts.fs.readdir || readdir,
+    readdirSync: opts.fs.readdirSync || readdirSync,
+    realpath: opts.fs.realpath || realpath,
+    realpathSync: opts.fs.realpathSync || realpathSync,
+    stat: opts.fs.stat || stat,
+    statSync: opts.fs.statSync || statSync
+  };
 
   if (opts.debug) {
     log('globbing with options:', opts);
