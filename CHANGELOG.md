@@ -1,3 +1,16 @@
+### [0.2.16](https://github.com/SuperchupuDev/tinyglobby/compare/0.2.15...0.2.16)
+
+#### Fixed
+
+- Upgraded `picomatch` to 4.0.4, mitigating any potential exposure to
+  [CVE-2026-33671](https://github.com/micromatch/picomatch/security/advisories/GHSA-c2c7-rcm5-vvqj)
+  and [CVE-2026-33672](https://github.com/micromatch/picomatch/security/advisories/GHSA-3v7f-55p6-f55p)
+
+#### Changed
+
+- Overhauled and optimized most internals by [Torathion](https://github.com/Torathion)
+- Ignore patterns are no longer compiled twice by [webpro](https://github.com/webpro)
+
 ### [0.2.15](https://github.com/SuperchupuDev/tinyglobby/compare/0.2.14...0.2.15)
 
 #### Added
