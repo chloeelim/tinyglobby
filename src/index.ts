@@ -26,7 +26,13 @@ const defaultOptions: GlobOptions = {
 };
 
 function getOptions(options?: GlobOptions): InternalOptions {
-  const opts = { ...defaultOptions, ...options } as InternalOptions;
+  const opts = Object.assign({}, options) as InternalOptions;
+  for (const key in defaultOptions) {
+    if (opts[key as keyof GlobOptions] === undefined) {
+      Object.assign(opts, { [key]: defaultOptions[key as keyof GlobOptions] });
+    }
+  }
+
 
   opts.cwd = (opts.cwd instanceof URL ? fileURLToPath(opts.cwd) : resolve(opts.cwd)).replace(BACKSLASHES, '/');
   // Default value of [] will be inserted here if ignore is undefined
