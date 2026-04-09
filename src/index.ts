@@ -33,7 +33,7 @@ function getOptions(options?: GlobOptions): InternalOptions {
     }
   }
 
-  const resolvedCwd = opts.cwd instanceof URL ? fileURLToPath(opts.cwd) : resolve(opts.cwd ?? process.cwd());
+  const resolvedCwd = opts.cwd instanceof URL ? fileURLToPath(opts.cwd) : resolve(opts.cwd || process.cwd());
   opts.cwd = resolvedCwd.replace(BACKSLASHES, '/');
 
   // Default value of [] will be inserted here if ignore is undefined
