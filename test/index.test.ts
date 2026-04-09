@@ -304,6 +304,17 @@ test('common path prefix is respected across multiple patterns', async () => {
   assert.deepEqual(files.sort(), ['a/a.txt', 'a/b.txt']);
 });
 
+test('cwd defaults to process.cwd() evaluated at call time, not import time', async () => {
+  const importTimeCwd = process.cwd();
+  try {
+    process.chdir(cwd); // cwd !== importTimeCwd (fixture is in a temp dir)
+    const files = await glob('a/*.txt'); // no cwd passed - must use call-time process.cwd()
+    assert.deepEqual(files.sort(), ['a/a.txt', 'a/b.txt']);
+  } finally {
+    process.chdir(importTimeCwd);
+  }
+});
+
 test('explicit undefined options fall back to defaults', async () => {
   // cwd: undefined should not throw
   await assert.doesNotReject(() => glob('*', { cwd: undefined }));
