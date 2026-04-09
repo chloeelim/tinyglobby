@@ -308,15 +308,15 @@ test('explicit undefined options fall back to defaults', async () => {
   // cwd: undefined should not throw
   await assert.doesNotReject(() => glob('*', { cwd: undefined }));
 
-  // expandDirectories defaults to true — directories should be expanded
+  // expandDirectories defaults to true - directories should be expanded
   const expandFiles = await glob('a', { cwd, expandDirectories: undefined });
   assert.deepEqual(expandFiles.sort(), ['a/a.txt', 'a/b.txt']);
 
-  // onlyFiles defaults to true — directories should not appear
+  // onlyFiles defaults to true - directories should not appear
   const onlyFilesResult = await glob('a', { cwd, onlyFiles: undefined });
   assert.ok(!onlyFilesResult.includes('a/'));
 
-  // caseSensitiveMatch defaults to true — uppercase pattern should not match
+  // caseSensitiveMatch defaults to true - uppercase pattern should not match
   const caseFiles = await glob('**/A.TXT', { cwd, caseSensitiveMatch: undefined });
   assert.deepEqual(caseFiles, []);
 });

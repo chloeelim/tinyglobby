@@ -33,7 +33,6 @@ function getOptions(options?: GlobOptions): InternalOptions {
     }
   }
 
-
   opts.cwd = (opts.cwd instanceof URL ? fileURLToPath(opts.cwd) : resolve(opts.cwd)).replace(BACKSLASHES, '/');
   // Default value of [] will be inserted here if ignore is undefined
   opts.ignore = ensureStringArray(opts.ignore);
